@@ -1,7 +1,7 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
-#include "hookIDT.h"
+
 
 /*
 ** ~ Informations:
@@ -13,6 +13,18 @@ MODULE_AUTHOR("[ EpiTek4 ] Strasbourg");
 ** ~ Initializations:
 */
 
+struct {
+    unsigned short limit;
+    unsigned long base;
+} __attribute__ ((packed))idtr;
+
+struct {
+    unsigned short off1;
+    unsigned short sel;
+    unsigned char none, flags;
+    unsigned short off2;
+} __attribute__ ((packed))idt;
+
 unsigned long	ptr_idt_table;
 unsigned long	pdt_gdt_table;
 unsigned long	old_interrupt;
@@ -23,9 +35,9 @@ static int	hookIDT_init(void)
 {
   printk(KERN_ALERT "[MSG] deadlands h00k IDT - module init\n");
 
-  ptr_idt_table = get_idt_addr();
-  epiHook(INT_0, &my_handler);
-  printk(KERN_ALERT "[MSG] deadlands h00k SYS - interrupt powned!\n");
+  //ptr_idt_table = get_idt_addr();
+  //epiHook(INT_0, &my_handler);
+  //printk(KERN_ALERT "[MSG] deadlands h00k SYS - interrupt powned!\n");
   return (0);
 }
 
@@ -41,11 +53,14 @@ static void	hookIDT_exit(void)
 */
 unsigned long	get_idt_addr(void)
 {
-  unsigned char	idtr[6];
-  unsigned long	idt;
-  __asm__ volatile ("sidt %0" :  "=m" (idtr));
-  idt = *((unsigned long *)&idtr[2]);
-  return (idt);
+  //unsigned char	idtr[6];
+  //unsigned long	idt;
+  //__asm__ volatile ("sidt %0" :  "=m" (idtr));
+  //idt = *((unsigned long *)&idtr[2]);
+  //return (idt);
+  asm("sidt %0":"=m" (idtr));
+  printk(KERN_ALERT "IDT Base Address: %p\n", idtr.base);
+  //memcpy(&idt, (void *)(idtr.base + 16 * 0x80), sizeof(idt));
 }
 
 int		epiHook(int nINT, void *new_interrupt)
