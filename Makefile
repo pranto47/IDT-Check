@@ -1,4 +1,4 @@
-obj-m += IDT-Check.o
+obj-m += idt_check.o
 all:
   sudo make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
